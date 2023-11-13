@@ -3,6 +3,7 @@ import statsmodels.api as sm
 import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
+import plotly.io as pio
 
 # Load your Excel data
 df = pd.read_excel('CPI regression.xlsx', sheet_name='Names')
@@ -52,4 +53,10 @@ correlation_matrix = df.iloc[:, 1:-1].corr()
 # Plot the heatmap using Plotly
 fig = px.imshow(correlation_matrix, labels=dict(x="Tier", y="Tier", color="Correlation"), x=correlation_matrix.index, y=correlation_matrix.columns)
 fig.update_layout(title='Correlation Matrix Heatmap', autosize=False, width=600, height=600)
-fig.show()
+
+# Save the heatmap as an HTML file
+pio.write_html(fig, 'correlation_heatmap.html')
+
+# Print a message about where to find the HTML file
+print("Correlation matrix heatmap saved as 'correlation_heatmap.html'. Open it in a web browser to interact with the plot.")
+
