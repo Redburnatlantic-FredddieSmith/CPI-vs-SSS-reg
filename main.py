@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
 import plotly.io as pio
+import numpy as np
 
 # Load your Excel data
 df = pd.read_excel('CPI regression.xlsx', sheet_name='Names')
@@ -47,16 +48,38 @@ results_df = pd.DataFrame(results).T
 print("Regression Results:")
 print(results_df)
 
-# Calculate the correlation matrix
-correlation_matrix = df.iloc[:, 1:-1].corr()
+# Calculate the correlation matrix, including correlation to CPI
+correlation_matrix = df.corr()
+np.fill_diagonal(correlation_matrix.values, np.nan)
+
+# Exclude the "Year" column from the heatmap
+correlation_matrix = correlation_matrix.drop("Year", axis=0)
+correlation_matrix = correlation_matrix.drop("Year", axis=1)
 
 # Plot the heatmap using Plotly
-fig = px.imshow(correlation_matrix, labels=dict(x="Tier", y="Tier", color="Correlation"), x=correlation_matrix.index, y=correlation_matrix.columns)
-fig.update_layout(title='Correlation Matrix Heatmap', autosize=False, width=600, height=600)
+fig = px.imshow(correlation_matrix, labels=dict(x="Variable", y="Variable", color="Correlation"), x=correlation_matrix.index, y=correlation_matrix.columns)
+fig.update_layout(title='Correlation Matrix Heatmap', autosize=False, width=800, height=800)
 
-# Save the heatmap as an HTML file
-pio.write_html(fig, 'correlation_heatmap.html')
+# Add correlation values as text annotations
+for i, row in enumerate(correlation_matrix.index):
+    for j, col in enumerate(correlation_matrix.columns):
+        if not np.isnan(correlation_matrix.loc[row, col]):
+            fig.add_annotation(
+                x=i,
+                y=j,
+                text=f"{correlation_matrix.loc[row, col]:.2f}",
+                showarrow=False,
+                font=dict(color='black', size=10),
+            )
 
-# Print a message about where to find the HTML file
-print("Correlation matrix heatmap saved as 'correlation_heatmap.html'. Open it in a web browser to interact with the plot.")
+# Save the heatmap as a PNG file
+fig.write_image('correlation_heatmap.png')
+
+# Print a message about where to find the PNG file
+print("Correlation matrix heatmap saved as 'correlation_heatmap.png'. Open the file to view the plot.")
+
+
+
+
+
 
